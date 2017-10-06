@@ -11,29 +11,27 @@ class PolyTreeNode
   end
 
   def parent=(new_parent)
-    old_parent = @parent
+    @parent.access_children.delete(self) unless @parent.nil?
     @parent = new_parent
     unless new_parent.nil? || new_parent.access_children.include?(self)
       new_parent.access_children << self
     end
-    old_parent.access_children.delete(self)
   end
 
   def children=(child)
     @children = child
   end
 
-  # def add_child(child)
-  #   self.access_children << child
-  #   child.parent = self
-  # end
-  #
-  # def remove_child(child)
-  #   if !self.access_children.include?(child)
-  #     raise "No children here"
-  #   end
-  #   child.parent = nil
-  # end
+  def add_child(child)
+    child.parent = self
+  end
+
+  def remove_child(child)
+    if !self.access_children.include?(child)
+      raise "No children here"
+    end
+    child.parent = nil
+  end
 
   def children
     @children.dup
@@ -41,6 +39,16 @@ class PolyTreeNode
 
   def value
     @value
+  end
+
+  def dfs(target)
+    return self if self.value == target
+    children.each do |child|
+      return child if child.value == target
+      result = child.dfs(target)
+      return result unless result.nil?
+    end
+    nil
   end
 
 
